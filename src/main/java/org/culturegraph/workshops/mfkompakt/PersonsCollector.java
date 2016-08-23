@@ -25,45 +25,28 @@
  */
 package org.culturegraph.workshops.mfkompakt;
 
-import org.culturegraph.mf.morph.Metamorph;
-import org.culturegraph.mf.stream.converter.PojoEncoder;
-import org.culturegraph.mf.stream.converter.xml.MarcXmlHandler;
-import org.culturegraph.mf.stream.converter.xml.XmlDecoder;
-import org.culturegraph.mf.stream.source.FileOpener;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.culturegraph.mf.framework.DefaultObjectReceiver;
 
 /**
- * Main class of the Metafacture Kompakt application.
+ * Collects all received {@lin Person} objects in a collection.
  *
  * @author Christoph Böhme
- * @author Jens Wille
  *
  */
-public final class MetafactureKompakt {
+public final class PersonsCollector extends DefaultObjectReceiver<Person> {
 
-	public static void main(final String[] args) {
-    final FileOpener opener = new FileOpener();
+  private final List<Person> persons = new ArrayList<Person>();
 
-    final XmlDecoder decoder = new XmlDecoder();
-    final MarcXmlHandler marcHandler = new MarcXmlHandler();
+  public List<Person> getPersons() {
+    return persons;
+  }
 
-    final Metamorph morph = new Metamorph("transformation.xml");
-
-    final PojoEncoder<Person> pojoEncoder = new PojoEncoder<Person>(Person.class);
-    final PersonsCollector collector = new PersonsCollector();
-
-    opener
-        .setReceiver(decoder)
-        .setReceiver(marcHandler)
-        .setReceiver(morph)
-        .setReceiver(pojoEncoder)
-        .setReceiver(collector);
-
-    opener.process("persons_marcxml.xml");
-    opener.closeStream();
-
-    for (final Person person : collector.getPersons()) {
-      System.out.println(person);
-    }
-	}
+  @Override
+  public void process(final Person obj) {
+    persons.add(obj);
+  }
 
 }
