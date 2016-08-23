@@ -30,6 +30,7 @@ import org.culturegraph.mf.stream.converter.PojoEncoder;
 import org.culturegraph.mf.stream.converter.JsonEncoder;
 import org.culturegraph.mf.stream.converter.xml.MarcXmlHandler;
 import org.culturegraph.mf.stream.converter.xml.XmlDecoder;
+import org.culturegraph.mf.stream.pipe.StreamTee;
 import org.culturegraph.mf.stream.sink.ObjectWriter;
 import org.culturegraph.mf.stream.source.FileOpener;
 
@@ -57,16 +58,19 @@ public final class MetafactureKompakt {
     jsonEncoder.setPrettyPrinting(true);
     final ObjectWriter<String> writer = new ObjectWriter<>("persons.json");
 
+    final StreamTee tee = new StreamTee();
+
     opener
         .setReceiver(decoder)
         .setReceiver(marcHandler)
         .setReceiver(morph)
+        .setReceiver(tee);
 
-        //.setReceiver(pojoEncoder)
-        //.setReceiver(collector);
+    tee.addReceiver(pojoEncoder);
+    pojoEncoder.setReceiver(collector);
 
-        .setReceiver(jsonEncoder)
-        .setReceiver(writer);
+    tee.addReceiver(jsonEncoder);
+    jsonEncoder.setReceiver(writer);
 
     opener.process("persons_marcxml.xml");
     opener.closeStream();
