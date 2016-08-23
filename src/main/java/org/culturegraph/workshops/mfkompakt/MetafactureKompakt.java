@@ -27,8 +27,10 @@ package org.culturegraph.workshops.mfkompakt;
 
 import org.culturegraph.mf.morph.Metamorph;
 import org.culturegraph.mf.stream.converter.PojoEncoder;
+import org.culturegraph.mf.stream.converter.JsonEncoder;
 import org.culturegraph.mf.stream.converter.xml.MarcXmlHandler;
 import org.culturegraph.mf.stream.converter.xml.XmlDecoder;
+import org.culturegraph.mf.stream.sink.ObjectWriter;
 import org.culturegraph.mf.stream.source.FileOpener;
 
 /**
@@ -51,12 +53,20 @@ public final class MetafactureKompakt {
     final PojoEncoder<Person> pojoEncoder = new PojoEncoder<Person>(Person.class);
     final PersonsCollector collector = new PersonsCollector();
 
+    final JsonEncoder jsonEncoder = new JsonEncoder();
+    jsonEncoder.setPrettyPrinting(true);
+    final ObjectWriter<String> writer = new ObjectWriter<>("persons.json");
+
     opener
         .setReceiver(decoder)
         .setReceiver(marcHandler)
         .setReceiver(morph)
-        .setReceiver(pojoEncoder)
-        .setReceiver(collector);
+
+        //.setReceiver(pojoEncoder)
+        //.setReceiver(collector);
+
+        .setReceiver(jsonEncoder)
+        .setReceiver(writer);
 
     opener.process("persons_marcxml.xml");
     opener.closeStream();
