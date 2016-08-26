@@ -47,11 +47,11 @@ public final class MetafactureKompakt {
     final FileOpener opener = new FileOpener();
 
     final XmlDecoder decoder = new XmlDecoder();
-    final MarcXmlHandler marcHandler = new MarcXmlHandler();
+    final MarcXmlHandler handler = new MarcXmlHandler();
 
     final Metamorph morph = new Metamorph("transformation.xml");
 
-    final PojoEncoder<Person> pojoEncoder = new PojoEncoder<Person>(Person.class);
+    final PojoEncoder<Person> pojoEncoder = new PojoEncoder<>(Person.class);
     final PersonsCollector collector = new PersonsCollector();
 
     final JsonEncoder jsonEncoder = new JsonEncoder();
@@ -62,14 +62,15 @@ public final class MetafactureKompakt {
 
     opener
         .setReceiver(decoder)
-        .setReceiver(marcHandler)
+        .setReceiver(handler)
         .setReceiver(morph)
         .setReceiver(tee);
 
-    tee.addReceiver(pojoEncoder);
-    pojoEncoder.setReceiver(collector);
+    tee
+      .addReceiver(pojoEncoder)
+      .addReceiver(jsonEncoder);
 
-    tee.addReceiver(jsonEncoder);
+    pojoEncoder.setReceiver(collector);
     jsonEncoder.setReceiver(writer);
 
     opener.process("persons_marcxml.xml");
